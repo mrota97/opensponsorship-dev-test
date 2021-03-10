@@ -6,11 +6,9 @@ import Select from "react-select"
 
 import SportTypes from "../sportTypes"
 
-// const sport_types = require("../sportTypes.json")
-
 export default function BasicInfoCard({ setBasicInfo }) {
   const [name, setName] = React.useState("")
-  const [sport, setSport] = React.useState("")
+  const [sport, setSport] = React.useState([])
   const [gender, setGender] = React.useState("")
   const [dob, setDob] = React.useState(new Date())
 
@@ -40,9 +38,10 @@ export default function BasicInfoCard({ setBasicInfo }) {
           <Form.Group controlId="formSport">
             <Form.Label>Sport</Form.Label>
             <Select
+              value={sport}
               options={SportTypes}
-              // onSelect={(e) => console.log(e.name)}
-              // onRemove={() => console.log("removed")}
+              onChange={setSport}
+              isMulti
             />
           </Form.Group>
           

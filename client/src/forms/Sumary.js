@@ -1,10 +1,10 @@
 import * as React from "react"
 import Card from "react-bootstrap/Card"
 import Form from "react-bootstrap/Form"
-
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import Button from "react-bootstrap/Button"
+import Select from "react-select"
 
 let currentDate = new Date()
 
@@ -14,6 +14,7 @@ export default function SummaryCard({
   gender = "Male",
   dob = currentDate.toString(),
   description = "N/A",
+  interests = "N/A",
   location = "20 W 34th St, New York, NY 10001",
   teamName = "New York Yankees",
   onSubmit,
@@ -28,7 +29,7 @@ export default function SummaryCard({
             Name
           </Form.Label>
           <Col sm="10">
-            <Form.Control plaintext readOnly value={name} />
+            <Form.Control readOnly value={name} />
           </Col>
         </Form.Group>
 
@@ -37,7 +38,11 @@ export default function SummaryCard({
             Sport(s)
           </Form.Label>
           <Col sm="10">
-            <Form.Control readOnly value={sport} />
+            <Select
+              value={sport}
+              isDisabled
+              isMulti
+            />
           </Col>
         </Form.Group>
 
@@ -46,7 +51,7 @@ export default function SummaryCard({
             Gender
           </Form.Label>
           <Col sm="10">
-            <Form.Control plaintext readOnly value={gender} />
+            <Form.Control readOnly value={gender} />
           </Col>
         </Form.Group>
 
@@ -55,7 +60,7 @@ export default function SummaryCard({
             Date of Birth
           </Form.Label>
           <Col sm="10">
-            <Form.Control plaintext readOnly value={dob} />
+            <Form.Control readOnly value={dob} />
           </Col>
         </Form.Group>
 
@@ -64,7 +69,16 @@ export default function SummaryCard({
             Description
           </Form.Label>
           <Col sm="10">
-            <Form.Control readOnly value={description} />
+            <Form.Control as="textarea" htmlSize={3} readOnly value={description} />
+          </Col>
+        </Form.Group>
+
+        <Form.Group as={Row}>
+          <Form.Label column sm="2">
+            Interests
+          </Form.Label>
+          <Col sm="10">
+            <Form.Control as="textarea" htmlSize={3} readOnly value={interests} />
           </Col>
         </Form.Group>
 
@@ -73,7 +87,7 @@ export default function SummaryCard({
             Location
           </Form.Label>
           <Col sm="10">
-            <Form.Control plaintext readOnly value={location} />
+            <Form.Control readOnly value={location} />
           </Col>
         </Form.Group>
 
@@ -82,7 +96,7 @@ export default function SummaryCard({
             Team Name
           </Form.Label>
           <Col sm="10">
-            <Form.Control plaintext readOnly value={teamName} />
+            <Form.Control readOnly value={teamName} />
           </Col>
         </Form.Group>
 
