@@ -1,16 +1,10 @@
 const express = require('express')
 const app = express()
 const mongoose = require("mongoose")
-const bodyParser = require("body-parser")
 const path = require("path")
+require('dotenv').config()
 
-app.use(bodyParser.json({}))
-app.use(bodyParser.urlencoded({ extended: true }))
-
-app.use(express.static(path.join(__dirname, "build")))
-app.get("/*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"))
-})
+app.use(express.json())
 
 const profileSchema = new mongoose.Schema({
   name: String,
@@ -82,19 +76,19 @@ app.put("/api/profiles/create", (req, res) => {
   res.send("unimplemented")
 })
 
-// normally you would pull the password from the enviornment/secret storage
-// I'm just putting it in plaintext here
-const uri = "mongodb+srv://matt:fiLN01hmHlZUkRUq@cluster0.hvskf.mongodb.net/athlete-profiles?retryWrites=true&w=majority"
-mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true});
+app.use(express.static(path.join(__dirname, "build")))
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"))
+})
 
-const db = mongoose.connection
-db.on('error', console.error.bind(console, "connection error: "))
-db.once('connected', () => {
+mongoose.connect(process.env.MONGO_ATLAS_URI, {useNewUrlParser: true, useUnifiedTopology: true});
+
+mongoose.connection.on('error', console.error.bind(console, "connection error: "))
+mongoose.connection.once('connected', () => {
   let port = process.env.PORT
   if (port == null || port == "") {
     port = 3001
   }
 
-  app.listen(port)
-
+  app.listen(port, () => console.log(`listening at http://localhost:${port}/`))
 })
