@@ -3,7 +3,10 @@ const mongoose = require("mongoose")
 const path = require("path")
 require('dotenv').config()
 
-mongoose.connect(process.env.MONGO_ATLAS_URI, {useNewUrlParser: true, useUnifiedTopology: true});
+function logErrorToConsole(err, req, res, next) {
+  console.log(err.stack)
+  next(err)
+}
 
 mongoose.connection.on('error', console.error.bind(console, "connection error: "))
 mongoose.connection.once('connected', () => {
@@ -18,6 +21,13 @@ mongoose.connection.once('connected', () => {
   app.get("/*", (req, res) => {
     res.sendFile(path.join(__dirname, "build", "index.html"))
   })
+
+  // if in dev, log errors to console
+  
+  if (process.env.NODE_ENV === "development") {
+    console.log("dev mode")
+    app.use(logErrorToConsole)
+  }
 
   // set the port from the env for Heroku
   let port = process.env.PORT
