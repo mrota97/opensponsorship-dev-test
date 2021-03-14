@@ -8,13 +8,21 @@ function logErrorToConsole(err, req, res, next) {
   next(err)
 }
 
+mongoose.connect(process.env.MONGO_ATLAS_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 mongoose.connection.on('error', console.error.bind(console, "connection error: "))
+
 mongoose.connection.once('connected', () => {
   const app = express()
+  const profileApi = require('./api')
+  
+  // register middleware
   app.use(express.json())
 
   // register our routes
-  app.use('/api', require('./api'))
+  app.use('/api', profileApi)
 
   // serve our built React code
   app.use(express.static(path.join(__dirname, "build")))
