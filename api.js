@@ -2,8 +2,13 @@ const express = require("express")
 const router = express.Router()
 const Profile = require("./ProfileModel")
 
-router.get("/profile", (req, res) => {
-  res.send("unimplemented")
+router.get("/profile", async (req, res, next) => {
+  try {
+    const allProfiles = await Profile.find()
+    res.send({ msg: "Success", status: 200, data: allProfiles })
+  } catch (error) {
+    next(error)
+  }
 })
 
 router.post("/profile/create", async (req, res) => {
