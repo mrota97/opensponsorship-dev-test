@@ -1,3 +1,4 @@
+const { ObjectId } = require("bson")
 const mongoose = require("mongoose")
 
 /**
@@ -16,35 +17,35 @@ const mongoose = require("mongoose")
 const profileSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, "Please enter your name."],
   },
   dob: {
     type: Date,
-    required: true,
+    required: [true, "Please enter your date of birth."],
   },
   location: {
     type: String,
-    required: true,
+    required: [true, "Please enter a location."],
   },
   team: {
     type: String,
-    required: true,
+    required: [true, "Please enter your favorite team."],
   },
   gender: {
     type: String,
-    required: true,
+    required: [true, "Please enter your gender."],
   },
   sports: {
-    type: String,
-    required: true,
+    type: [String],
+    validate: [list => list.length > 0, "You must provide one or more sports"]
   },
   about: {
     type: String,
-    required: true,
+    required: [true, "Please add a short description about yourself."],
   },
   interests: {
     type: String,
-    required: true,
+    required: [true, "Please list some of your interests."],
   },
   // profileImage: {
   //   data: Buffer,
