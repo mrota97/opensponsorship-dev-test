@@ -1,4 +1,3 @@
-const { ObjectId } = require("bson")
 const mongoose = require("mongoose")
 
 /**
@@ -35,10 +34,15 @@ const profileSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter your gender."],
   },
-  sports: {
-    type: [String],
-    validate: [list => list.length > 0, "You must provide one or more sports"]
-  },
+  // sports: {
+  //   type: [String],
+  //   validate: [list => list.length > 0, "You must provide one or more sports"]
+  // },
+  sports: [{
+    label: String,
+    value: String,
+    id: Number,
+  }],
   about: {
     type: String,
     required: [true, "Please add a short description about yourself."],
