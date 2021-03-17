@@ -38,7 +38,18 @@ router.get("/sign-s3", (req, res, next) => {
 router.get("/profile", async (req, res, next) => {
   try {
     const allProfiles = await Profile.find()
-    res.send({ msg: "Success", status: 200, data: allProfiles })
+
+    // create a list of profile ids and a lookup table
+    // for easy access on the frontend
+    const profileIdList = []
+    const profileIdMap = {}
+
+    allProfiles.forEach(value => {
+      profileIdList.push(value._id)
+      profileIdMap[value._id] = value
+    })
+    
+    res.send({ msg: "Success", status: 200, data: { profileIdList, profileIdMap } })
   } catch (error) {
     next(error)
   }
