@@ -47,13 +47,7 @@ const profileSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please list some of your interests."],
   },
-  // profileImage: {
-  //   data: Buffer,
-  //   contentType: {
-  //   type: String,
-  //   required: true,
-  //   },
-  // },
+  profileImage: String,
 })
 
 module.exports = mongoose.model("Profile", profileSchema)
