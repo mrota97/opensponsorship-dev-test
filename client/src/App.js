@@ -1,54 +1,121 @@
 import * as React from "react"
 import axios from "axios"
 import Container from "react-bootstrap/Container"
-import Row from "react-bootstrap/Row"
-import Col from "react-bootstrap/Col"
 import Navbar from "react-bootstrap/Navbar"
+import Accordion from "react-bootstrap/esm/Accordion"
 
 import BasicInfoCard from "./forms/BasicInfo"
 import AboutCard from "./forms/About"
 import SummaryCard from "./forms/Sumary"
+import ProfileList from "./ProfileList"
+import ProfileModal from "./ProfileModal"
 
 function App() {
-  const [basicInfo, setBasicInfo] = React.useState({})
-  const [aboutInfo, setAboutInfo] = React.useState({})
-  const [getProfiles, setGetProfiles] = React.useState(true)
+  // our profile list, and a bool to track if we need to get new data
+  const [profiles, setProfiles] = React.useState(null)
+  const [selectedProfile, setSelectedProfile] = React.useState(null)
+  const [isStale, setIsStale] = React.useState(true)
+  const [isEditing, setIsEditing] = React.useState(false)
+  const [resetForm, setResetForm] = React.useState(false)
+
+  // const [isModalVisible, setIsModalVisible] = React.useState(false)
+
+  const [accordionState, setAccordionState] = React.useState('0')
+  const [basicInfo, setBasicInfo] = React.useState(null)
+  const [aboutInfo, setAboutInfo] = React.useState(null)
+  
+  React.useEffect(() => {
+    if (basicInfo) {
+      setAccordionState("1")
+    }
+  }, [basicInfo])
 
   React.useEffect(() => {
-    console.log("test")
-  }, [getProfiles])
+    if (aboutInfo) {
+      setAccordionState("2")
+    }
+  }, [aboutInfo])
+
+  // retrieve profile data from the database when our local data is marked stale
+  React.useEffect(() => {
+    if (isStale) {
+      axios.get("/api/profile")
+      .then(({ data, msg, status }) => {
+        setProfiles(data.data)
+        setIsStale(false)
+      })
+      .catch(err => {
+        setIsStale(false)
+      })
+    }
+  }, [isStale])
 
   function onSubmit(e) {
     e.preventDefault()
+
+    // this state is used to track if the form should be reset
+    // after successful submission, each child form will react to it
+    setResetForm(false)
+
     const payload = { ...basicInfo, ...aboutInfo }
-    axios.post("/api/profiles/create", payload)
+    axios.post("/api/profile/create", payload)
       .then(res => {
-        setGetProfiles(true)
-        console.log(res)
+        setIsStale(true)
+        
+        // close accordion and reset form state
+        setAccordionState("-1")
+        setBasicInfo(null)
+        setAboutInfo(null)
+        setResetForm(true)
+      })
+      .catch(err => {
+        console.log(err)
+        alert("Could not create profile")
       })
   }
 
   return (
     <>
-      <Navbar bg="dark" variant="dark">
+      <ProfileModal
+        profile={profiles?.profileIdMap[selectedProfile] || {}}
+        show={selectedProfile}
+        onHide={() => setSelectedProfile(null)}
+        toggleEditing={() => setIsEditing(true)}
+      />
+      <Navbar bg="primary" variant="dark">
         <Navbar.Brand>Athlete Profiles</Navbar.Brand>
       </Navbar>
-      <Container>
-        <Row>
-          <Col>
-            <BasicInfoCard setBasicInfo={(data) => setBasicInfo(data)} />
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <AboutCard setAboutInfo={setAboutInfo} />
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <SummaryCard onSubmit={onSubmit} {...basicInfo} {...aboutInfo} />
-          </Col>
-        </Row>
+      <Container className="pt-3" id="container-root">
+        <Accordion activeKey={accordionState}>
+          <BasicInfoCard
+            accordionActiveKey="0"
+            setBasicInfo={(data) => setBasicInfo(data)}
+            openBasicInfo={() => {
+              if (accordionState === "0") setAccordionState("-1")
+              else if (accordionState === "-1") setAccordionState("0")
+            }}
+            shouldFormReset={resetForm}
+          />
+          <AboutCard
+            accordionActiveKey="1"
+            setAboutInfo={setAboutInfo}
+            previousForm={() => setAccordionState("0")}
+            shouldFormReset={resetForm}
+          />
+          <SummaryCard
+            accordionActiveKey="2"
+            onSubmit={onSubmit}
+            previousForm={() => setAccordionState("1")}
+            {...basicInfo}
+            {...aboutInfo}
+          />
+        </Accordion>
+        <ProfileList
+          isStale={isStale}
+          data={profiles}
+          selectProfile={setSelectedProfile}
+          setIsEditing={() => setIsEditing(true)}
+        />
       </Container>
     </>
   );
