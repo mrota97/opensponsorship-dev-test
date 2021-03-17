@@ -1,100 +1,47 @@
 const express = require('express')
-const app = express()
 const mongoose = require("mongoose")
-const bodyParser = require("body-parser")
 const path = require("path")
+require('dotenv').config()
 
-app.use(bodyParser.json({}))
-app.use(bodyParser.urlencoded({ extended: true }))
+function logErrorToConsole(err, req, res, next) {
+  console.log(err.stack)
+  next(err)
+}
 
-app.use(express.static(path.join(__dirname, "build")))
-app.get("/*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"))
-})
+mongoose.connect(process.env.MONGO_ATLAS_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+mongoose.connection.on('error', console.error.bind(console, "connection error: "))
 
-const profileSchema = new mongoose.Schema({
-  name: String,
-  dob: Date,
-  location: String,
-  team: String,
-  gender: String,
-  sports: String,
-  about: String,
-  interests: String,
-  // profileImage: {
-  //   data: Buffer,
-  //   contentType: String,
-  // },
-})
+mongoose.connection.once('connected', () => {
+  const app = express()
+  const profileApi = require('./api')
+  
+  // register middleware
+  app.use(express.json())
 
-const Profile = mongoose.model("Profile", profileSchema)
+  // register our routes
+  app.use('/api', profileApi)
 
-app.get("/", (req, res) => {
-  res.send("api is up")
-})
-
-app.get("/api/profiles", (req, res) => {
-  res.send("unimplemented")
-})
-
-app.post("/api/profiles/create", async (req, res) => {
-  // name: "John Doe",
-  // sport: "N/A",
-  // gender: "Male",
-  // dob: currentDate.toString(),
-  // description: "N/A",
-  // location: "20 W 34th St, New York, NY 10001",
-  // teamName: "New York Yankees",
-  // interests: "None"
-  // get the request data
-  console.log(req.body)
-  const {
-    name,
-    sport,
-    gender,
-    dob,
-    description,
-    location,
-    teamName,
-    interests,
-  } = req.body
-
-  const newProfile = new Profile({
-    name,
-    dob,
-    location,
-    team: teamName,
-    gender,
-    sports: sport,
-    about: description,
-    interests,
+  // serve our built React code
+  app.use(express.static(path.join(__dirname, "build")))
+  app.get("/*", (req, res) => {
+    res.sendFile(path.join(__dirname, "build", "index.html"))
   })
 
-  await newProfile.save()
-
-  console.log(newProfile)
+  // if in dev, log errors to console
   
-  // finish
-  res.send({ msg: "Success", status: 200 })
-})
+  if (process.env.NODE_ENV === "development") {
+    console.log("dev mode")
+    app.use(logErrorToConsole)
+  }
 
-app.put("/api/profiles/create", (req, res) => {
-  res.send("unimplemented")
-})
-
-// normally you would pull the password from the enviornment/secret storage
-// I'm just putting it in plaintext here
-const uri = "mongodb+srv://matt:fiLN01hmHlZUkRUq@cluster0.hvskf.mongodb.net/athlete-profiles?retryWrites=true&w=majority"
-mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true});
-
-const db = mongoose.connection
-db.on('error', console.error.bind(console, "connection error: "))
-db.once('connected', () => {
+  // set the port from the env for Heroku
   let port = process.env.PORT
   if (port == null || port == "") {
     port = 3001
   }
 
-  app.listen(port)
-
+  app.listen(port, () => console.log(`listening at http://localhost:${port}/`))
 })
