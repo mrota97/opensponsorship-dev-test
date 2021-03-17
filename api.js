@@ -47,7 +47,7 @@ router.get("/profile", async (req, res, next) => {
 router.post("/profile/create", async (req, res, next) => {
   try {
     // we'll just use the spread syntax here to fill all of the
-    // required fields. mongoose validation will catch any isseus
+    // required fields. mongoose validation will catch any issues
     const newProfile = new Profile({ ...req.body })
 
     await newProfile.save()
