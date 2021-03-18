@@ -22,18 +22,32 @@ const basicInfoValidation = Yup.object({
   gender: Yup.string().required('Please enter your gender')
 })
 
-function BasicInfoForm({ setBasicInfo, shouldFormReset }) {
+function BasicInfoForm({ setBasicInfo, openBasicInfo, shouldFormReset, isEditing, selectedProfile }) {
   const [errors, setErrors] = React.useState({})
   const [name, setName] = React.useState("")
   const [dob, setDob] = React.useState(moment().toDate())
   const [sports, setSports] = React.useState([])
   const [gender, setGender] = React.useState("")
 
+  // if we want to edit the profile, populate the form with its fields
+  React.useEffect(() => {
+    if (selectedProfile) {
+      console.log(selectedProfile)
+      setName(selectedProfile.name)
+      setDob(moment(selectedProfile.dob))
+      setSports(selectedProfile.sports)
+      setGender(selectedProfile.gender)
+
+      // open the card as well
+      openBasicInfo()
+    }
+  }, [isEditing])
+
   React.useEffect(() => {
     if (shouldFormReset) {
       setErrors({})
       setName("")
-      setDob(moment().toDate())
+      setDob(moment())
       setSports([])
       setGender("")
     }
@@ -127,19 +141,25 @@ function BasicInfoForm({ setBasicInfo, shouldFormReset }) {
   )
 }
 
-export default function BasicInfoCard({ accordionActiveKey, setBasicInfo, openBasicInfo, shouldFormReset }) {
+export default function BasicInfoCard({ accordionActiveKey, setBasicInfo, toggleBasicInfo, openBasicInfo, shouldFormReset, isEditing, selectedProfile }) {
   return (
     <Card>
       <Accordion.Toggle
         as={Card.Header}
-        onClick={openBasicInfo}
+        onClick={toggleBasicInfo}
         eventKey={accordionActiveKey}
       >
         Basic Info
       </Accordion.Toggle>
       <Accordion.Collapse eventKey={accordionActiveKey}>
         <Card.Body className="mb-3">
-          <BasicInfoForm setBasicInfo={setBasicInfo} shouldFormReset={shouldFormReset} />
+          <BasicInfoForm
+            setBasicInfo={setBasicInfo}
+            openBasicInfo={openBasicInfo}
+            shouldFormReset={shouldFormReset}
+            isEditing={isEditing}
+            selectedProfile={selectedProfile}
+          />
         </Card.Body>
       </Accordion.Collapse>
     </Card>

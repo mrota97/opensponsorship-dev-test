@@ -14,7 +14,7 @@ const aboutFormValidation = Yup.object({
   interests: Yup.string().required("Please list some of your interests")
 })
 
-const AboutForm = ({ setAboutInfo, previousForm, shouldFormReset }) => {
+const AboutForm = ({ setAboutInfo, previousForm, shouldFormReset, isEditing, selectedProfile }) => {
   const [errors, setErrors] = React.useState({})
   const [about, setAbout] = React.useState("")
   const [interests, setInterests] = React.useState("")
@@ -22,6 +22,16 @@ const AboutForm = ({ setAboutInfo, previousForm, shouldFormReset }) => {
   const [team, setTeam] = React.useState("")
   const [profileImageName, setProfileImageName] = React.useState("Upload a profile image...")
   const [profileImage, setProfileImage] = React.useState(null)
+
+  React.useEffect(() => {
+    if (isEditing && selectedProfile) {
+      setAbout(selectedProfile.about)
+      setInterests(selectedProfile.interests)
+      setLocation(selectedProfile.location)
+      setTeam(selectedProfile.team)
+      setProfileImage(selectedProfile.profileImage)
+    }
+  }, [isEditing, selectedProfile])
 
   React.useEffect(() => {
     if (shouldFormReset) {
@@ -147,7 +157,7 @@ const AboutForm = ({ setAboutInfo, previousForm, shouldFormReset }) => {
   )
 }
 
-export default function AboutCard({ accordionActiveKey, setAboutInfo, previousForm, shouldFormReset }) {
+export default function AboutCard({ accordionActiveKey, setAboutInfo, previousForm, shouldFormReset, isEditing, selectedProfile }) {
   return (
     <Card>
       <Accordion.Toggle as={Card.Header} eventKey={accordionActiveKey}>
@@ -155,7 +165,7 @@ export default function AboutCard({ accordionActiveKey, setAboutInfo, previousFo
       </Accordion.Toggle>
       <Accordion.Collapse eventKey={accordionActiveKey}>
         <Card.Body>
-          <AboutForm setAboutInfo={setAboutInfo} previousForm={previousForm} shouldFormReset={shouldFormReset} />
+          <AboutForm setAboutInfo={setAboutInfo} previousForm={previousForm} shouldFormReset={shouldFormReset} isEditing={isEditing} selectedProfile={selectedProfile} />
         </Card.Body>
       </Accordion.Collapse>
     </Card>

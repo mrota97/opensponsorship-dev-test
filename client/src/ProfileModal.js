@@ -1,8 +1,6 @@
 import React from "react"
 import Modal from "react-bootstrap/Modal"
 import Container from "react-bootstrap/Container"
-import InputGroup from "react-bootstrap/InputGroup"
-import FormControl from "react-bootstrap/FormControl"
 import Form from "react-bootstrap/Form"
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
@@ -14,7 +12,7 @@ import moment from "moment"
 import { run as runHolder } from "holderjs/holder"
 
 
-const ProfileModal = ({ profile, show, onHide, toggleEditing }) => {
+const ProfileModal = ({ profile, show, closeModal, toggleEditing }) => {
   React.useEffect(() => {
     // hack to keep images loaded during state changes
     if (!profile.profileImage) {
@@ -22,15 +20,10 @@ const ProfileModal = ({ profile, show, onHide, toggleEditing }) => {
     }
   })
 
-  function onModalHide() {
-    // run any effects from the parent
-    onHide()
-  }
-
   return (
     <Modal
       show={show}
-      onHide={onModalHide}
+      onHide={closeModal}
       size="lg"
       centered
     >

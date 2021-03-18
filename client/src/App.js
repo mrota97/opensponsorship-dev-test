@@ -18,8 +18,7 @@ function App() {
   const [isEditing, setIsEditing] = React.useState(false)
   const [resetForm, setResetForm] = React.useState(false)
 
-  // const [isModalVisible, setIsModalVisible] = React.useState(false)
-
+  const [showModal, setShowModal] = React.useState(false)
   const [accordionState, setAccordionState] = React.useState('0')
   const [basicInfo, setBasicInfo] = React.useState(null)
   const [aboutInfo, setAboutInfo] = React.useState(null)
@@ -50,6 +49,13 @@ function App() {
     }
   }, [isStale])
 
+  function toggleEditingMode() {
+    // close the modal
+    setShowModal(false)
+    // toggle isEditing
+    setIsEditing(true)
+  }
+
   function onSubmit(e) {
     e.preventDefault()
 
@@ -58,29 +64,46 @@ function App() {
     setResetForm(false)
 
     const payload = { ...basicInfo, ...aboutInfo }
-    axios.post("/api/profile/create", payload)
-      .then(res => {
-        setIsStale(true)
-        
-        // close accordion and reset form state
-        setAccordionState("-1")
-        setBasicInfo(null)
-        setAboutInfo(null)
-        setResetForm(true)
-      })
-      .catch(err => {
-        console.log(err)
-        alert("Could not create profile")
-      })
+    if (isEditing && selectedProfile) {
+      axios.put(`/api/profile/edit/${selectedProfile}`, payload)
+        .then(res => {
+          setIsEditing(false)
+          setIsStale(true)
+          
+          // close accordion and reset form state
+          setAccordionState("-1")
+          setBasicInfo(null)
+          setAboutInfo(null)
+        })
+        .catch(err => {
+          console.log(err)
+          alert("Could not create profile")
+        })
+    } else {
+      axios.post("/api/profile/create", payload)
+        .then(res => {
+          setIsStale(true)
+          
+          // close accordion and reset form state
+          setAccordionState("-1")
+          setBasicInfo(null)
+          setAboutInfo(null)
+          setResetForm(true)
+        })
+        .catch(err => {
+          console.log(err)
+          alert("Could not create profile")
+        })
+    }
   }
 
   return (
     <>
       <ProfileModal
         profile={profiles?.profileIdMap[selectedProfile] || {}}
-        show={selectedProfile}
-        onHide={() => setSelectedProfile(null)}
-        toggleEditing={() => setIsEditing(true)}
+        show={showModal}
+        closeModal={() => setShowModal(false)}
+        toggleEditing={toggleEditingMode}
       />
       <Navbar bg="primary" variant="dark">
         <Navbar.Brand>Athlete Profiles</Navbar.Brand>
@@ -90,17 +113,22 @@ function App() {
           <BasicInfoCard
             accordionActiveKey="0"
             setBasicInfo={(data) => setBasicInfo(data)}
-            openBasicInfo={() => {
+            toggleBasicInfo={() => {
               if (accordionState === "0") setAccordionState("-1")
               else if (accordionState === "-1") setAccordionState("0")
             }}
+            openBasicInfo={() => setAccordionState("0")}
             shouldFormReset={resetForm}
+            isEditing={isEditing}
+            selectedProfile={profiles?.profileIdMap[selectedProfile]}
           />
           <AboutCard
             accordionActiveKey="1"
             setAboutInfo={setAboutInfo}
             previousForm={() => setAccordionState("0")}
             shouldFormReset={resetForm}
+            isEditing={isEditing}
+            selectedProfile={profiles?.profileIdMap[selectedProfile]}
           />
           <SummaryCard
             accordionActiveKey="2"
@@ -113,8 +141,10 @@ function App() {
         <ProfileList
           isStale={isStale}
           data={profiles}
-          selectProfile={setSelectedProfile}
-          setIsEditing={() => setIsEditing(true)}
+          selectProfile={id => {
+            setSelectedProfile(id)
+            setShowModal(true)
+          }}
         />
       </Container>
     </>
